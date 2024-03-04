@@ -107,8 +107,7 @@ public class OfferService {
         );
     }
 
-    //@Scheduled(cron = "@monthly")
-    @Scheduled(fixedDelay = 200000)
+    @Scheduled(cron = "@monthly")
     private void generateOffers() {
         List<Client> clients;
         int offset = 0;

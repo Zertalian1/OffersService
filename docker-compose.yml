@@ -35,7 +35,7 @@ services:
     environment:
       KAFKA_BROKERCONNECT: "kafka:29092"
     depends_on:
-      - "kafka"
+      - kafka
 
   postgresql:
     image: postgres:latest
@@ -63,6 +63,5 @@ services:
     container_name: show-offers
     ports:
       - "8081:8081"
-    #depends_on:
-    #  generating-offers:
-    #    condition: service_healthy
+    depends_on:
+      - generating-offers

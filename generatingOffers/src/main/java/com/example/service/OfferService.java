@@ -1,9 +1,6 @@
 package com.example.service;
 
-import com.example.domain.dto.OfferDto;
-import com.example.domain.entity.Client;
-import com.example.domain.entity.OfferPattern;
-import com.example.domain.entity.Parameter;
+import com.example.domain.entity.*;
 import com.example.repository.ClientRepository;
 import com.example.repository.OfferPatternRepository;
 import com.example.repository.OfferRepository;
@@ -13,6 +10,8 @@ import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.export.JRTextExporter;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleWriterExporterOutput;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -22,6 +21,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,8 +34,9 @@ public class OfferService {
     private final OfferRepository offerRepository;
     private final ClientRepository clientRepository;
     private final OfferPatternRepository offerPatternRepository;
-    private final DataSender<OfferDto> dataSender;
     private final ParameterRepository parameterRepository;
+
+    private final Logger log = LoggerFactory.getLogger(OfferService.class);
     private final ExecutorService executorService = Executors.newFixedThreadPool(20);
     @Value("${application.client.page-size}")
     private int pageSize;
@@ -51,7 +52,6 @@ public class OfferService {
                         case "firstName" -> params.put("firstName", client.getFirstName());
                         case "lastName" -> params.put("lastName", client.getLastName());
                         case "patronymic" -> params.put("patronymic", client.getPatronymic());
-                        case "email" -> params.put("email", client.getEmail());
                         default -> params.put(parameter.getName(), "sampleText");
                     }
                 }
@@ -64,7 +64,7 @@ public class OfferService {
         return params;
     }
 
-    private OfferDto generateReport(OfferPattern pattern, Client client) {
+    private Offer generateReport(OfferPattern pattern, Client client) {
         StringBuilder builder = new StringBuilder();
         builder.append(reportsPath);
         builder.append(pattern.getDirectory().replace(".", "/"));
@@ -83,39 +83,44 @@ public class OfferService {
             exporter.exportReport();
             System.out.println(outputStream.toString(StandardCharsets.UTF_8));
         } catch (FileNotFoundException e) {
-            System.err.println("can not find pattern");
+            log.warn("can not find pattern");
         } catch (JRException e) {
-            System.err.println("can not compile pattern");
+            log.warn("can not compile pattern");
         }
-        return new OfferDto(client.getEmail(), outputStream.toByteArray());
+        Offer offer = new Offer();
+        offer.setClient(client);
+        offer.setPattern(pattern);
+        offer.setOffer(outputStream.toByteArray());
+        offer.setShowDate(LocalDate.now());
+        return offer;
     }
 
-    @Scheduled(fixedDelay = 50000)
-    public void generateOffers() {
+    public void generateOfferForUser(Client client) {
+        executorService.submit(() ->
+                {
+                    List<OfferPattern> patterns = offerPatternRepository
+                            .selectPatternsByConditionsAndByUserId(client.getId());
+                    List<Offer> offers = patterns.stream()
+                            .map(offer -> generateReport(offer, client)).toList();
+                    offerRepository.saveAll(offers);
+                }
+        );
+    }
+
+    //@Scheduled(cron = "@monthly")
+    @Scheduled(fixedDelay = 200000)
+    private void generateOffers() {
         List<Client> clients;
         int offset = 0;
+        offerRepository.deleteOffersByShowDateMoreSixMonth();
         do {
             clients = clientRepository.getClientByPage(offset * pageSize, pageSize);
             for (Client client : clients) {
-                executorService.submit(() ->
-                        {
-                            List<OfferPattern> offers = offerPatternRepository
-                                    .selectPatternsByConditionsAndByUserId(client.getId());
-                            dataSender.sendMessage(offers.stream().map(offer ->
-                                    generateReport(offer, client)
-                            ).toList());
-                        }
-                );
+                generateOfferForUser(client);
             }
             offset++;
         } while (!clients.isEmpty());
 
     }
-
-    @Scheduled(fixedDelay = 150000)
-    public void deleteOffers() {
-        offerRepository.deleteOffersByShowDateMoreSixMonth();
-    }
-
 
 }

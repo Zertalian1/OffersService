@@ -7,7 +7,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class OfferDto {
-    private Long userId;
-    private byte[] offer;
+public class ShareUserDto {
+    private String username;
+    private String firstName;
+    private String lastName;
+    private String patronymic;
 }

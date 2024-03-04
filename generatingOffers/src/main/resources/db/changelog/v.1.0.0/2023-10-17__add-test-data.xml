@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+    <changeSet id="4" author="d.kurdyukov">
+        <insert tableName="clients">
+            <column name="username" value="ivan@mail.ru"/>
+            <column name="first_name" value="Иван"/>
+            <column name="last_name" value="Иванов"/>
+            <column name="patronymic" value="Иванович"/>
+        </insert>
+    </changeSet>
+    <changeSet id="5" author="d.kurdyukov">
+        <insert tableName="clients">
+            <column name="username" value="petr@mail.ru"/>
+            <column name="first_name" value="Пётр"/>
+            <column name="last_name" value="Петровович"/>
+            <column name="patronymic" value="Петров"/>
+        </insert>
+    </changeSet>
+    <changeSet id="6" author="d.kurdyukov">
+        <insert tableName="patterns">
+            <column name="pattern_id" value="1"/>
+            <column name="directory" value="test.dKurdyukov"/>
+            <column name="name" value="test.jrxml"/>
+        </insert>
+    </changeSet>
+    <changeSet id="7" author="d.kurdyukov">
+        <insert tableName="parameters">
+            <column name="name" value="lastName"/>
+            <column name="data_type" value="java.lang.String"/>
+            <column name="pattern_id" value="1"/>
+        </insert>
+        <insert tableName="parameters">
+            <column name="name" value="firstName"/>
+            <column name="data_type" value="java.lang.String"/>
+            <column name="pattern_id" value="1"/>
+        </insert>
+        <insert tableName="parameters">
+            <column name="name" value="patronymic"/>
+            <column name="data_type" value="java.lang.String"/>
+            <column name="pattern_id" value="1"/>
+        </insert>
+        <insert tableName="parameters">
+            <column name="name" value="creditPercent"/>
+            <column name="data_type" value="java.lang.Double"/>
+            <column name="pattern_id" value="1"/>
+        </insert>
+    </changeSet>
+
+
+</databaseChangeLog>

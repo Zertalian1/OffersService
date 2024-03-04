@@ -11,4 +11,6 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
 
     @Query(value = "SELECT * FROM clients OFFSET :offset LIMIT :size", nativeQuery = true)
     List<Client> getClientByPage(@Param("offset") int offset, @Param("size") int size);
+
+    Client getClientByUsername(String username);
 }

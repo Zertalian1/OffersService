@@ -15,8 +15,11 @@ public interface OfferRepository extends JpaRepository<Offer, Long> {
     @Query(
             value = "DELETE FROM clients_offers  where " +
                     "age(current_date, clients_offers.show_date) > INTERVAL '6 month' AND " +
-                    "(clients_offers.answer = 'REJECTION' OR clients_offers.answer = 'ACCEPTED')",
+                    "(clients_offers.answer = 'REJECTION' OR clients_offers.answer = 'ACCEPTED') OR " +
+                    "clients_offers.answer IS NULL",
             nativeQuery = true
     )
     void deleteOffersByShowDateMoreSixMonth();
+
+    Offer getOfferById(Long offerId);
 }

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+    <changeSet id="0" author="d.kurdyukov">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="clients"/>
+            </not>
+        </preConditions>
+        <createTable tableName="clients">
+            <column name="client_id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="username" type="varchar(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="first_name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="patronymic" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="1" author="d.kurdyukov">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="patterns"/>
+            </not>
+        </preConditions>
+        <createTable tableName="patterns">
+            <column name="pattern_id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="directory" type="varchar(512)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="varchar(128)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2" author="d.kurdyukov">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="clients_offers"/>
+            </not>
+        </preConditions>
+        <createTable tableName="clients_offers">
+            <column name="clients_offers_id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="client_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="client_id"/>
+            </column>
+            <column name="pattern_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="patterns.pattern_id"/>
+            </column>
+            <column name="show_date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="answer" type="varchar(512)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="offer" type="BINARY">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="3" author="d.kurdyukov">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="parameters"/>
+            </not>
+        </preConditions>
+        <createTable tableName="parameters">
+            <column name="parameter_id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar(512)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="data_type" type="varchar(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="pattern_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="patterns.pattern_id"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>
